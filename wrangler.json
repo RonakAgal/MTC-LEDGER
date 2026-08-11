@@ -1,4 +1,8 @@
 {
+  "$schema": "node_modules/wrangler/config-schema.json",
   "name": "mtc-ledger",
-  "pages_build_output_dir": "./dist"
+  "compatibility_date": "2026-08-01",
+  "assets": {
+    "directory": "./dist"
+  }
 }
