@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext';
 import { dataService } from '../services/dataService';
 import { 
   ArrowLeft, Store, DollarSign, ShieldCheck, Save, CheckCircle2, 
-  Sparkles, Phone, MapPin, Sliders, RefreshCw 
+  Sparkles, Phone, MapPin, Sliders, RefreshCw, KeyRound, Lock 
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -17,22 +18,29 @@ const LOGO_PRESETS = [
 
 export default function SettingsPage() {
   const { lang, t } = useLanguage();
+  const { changePassword } = useAuth();
   const navigate = useNavigate();
 
   const [settings, setSettings] = useState({
-    brandName: 'Papa Ka Register',
+    brandName: 'MTC-LEDGER',
     tagline: 'Tiffin & Catering Digital Management',
     phone: '9876543210',
     address: 'Shop 12, Main Market',
     defaultLunchPrice: 80,
     defaultDinnerPrice: 80,
     deliveryCharge: 0,
-    logoPreset: 'tiffin-box',
-    quickLoginEnabled: true
+    logoPreset: 'tiffin-box'
   });
 
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState('');
+
+  // Password reset state
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [pwdLoading, setPwdLoading] = useState(false);
+  const [pwdError, setPwdError] = useState('');
+  const [pwdSuccess, setPwdSuccess] = useState('');
 
   useEffect(() => {
     loadSettings();
@@ -50,6 +58,34 @@ export default function SettingsPage() {
     await dataService.updateSettings(settings);
     setToast(lang === 'hi' ? 'सेटिंग्स सफलतापूर्वक सहेजी गईं!' : 'Settings updated successfully!');
     setTimeout(() => setToast(''), 3000);
+  };
+
+  const handlePasswordChange = async (e) => {
+    e.preventDefault();
+    setPwdError('');
+    setPwdSuccess('');
+
+    if (!newPassword || newPassword.length < 6) {
+      setPwdError(lang === 'hi' ? 'पासवर्ड कम से कम 6 अक्षरों का होना चाहिए।' : 'Password must be at least 6 characters long.');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPwdError(lang === 'hi' ? 'दोनों पासवर्ड समान होने चाहिए।' : 'Passwords do not match.');
+      return;
+    }
+
+    setPwdLoading(true);
+    const res = await changePassword(newPassword);
+    setPwdLoading(false);
+
+    if (res.success) {
+      setPwdSuccess(lang === 'hi' ? 'पासवर्ड सफलतापूर्वक बदल दिया गया है!' : 'Password updated successfully!');
+      setNewPassword('');
+      setConfirmPassword('');
+      setTimeout(() => setPwdSuccess(''), 4000);
+    } else {
+      setPwdError(res.error || 'Failed to update password.');
+    }
   };
 
   if (loading) {
@@ -91,7 +127,7 @@ export default function SettingsPage() {
               {lang === 'hi' ? 'व्यापार सेटिंग्स एवं ब्रांड' : 'Business Settings & Branding'}
             </h2>
             <p className="text-[11px] text-slate-500 font-medium">
-              {lang === 'hi' ? 'ब्रांड नाम, टिफिन रेट और ऐप प्राथमिकताएं' : 'Customize Brand Name, Default Tiffin Prices & App Rules'}
+              {lang === 'hi' ? 'ब्रांड नाम, टिफिन रेट और पासवर्ड बदलें' : 'Customize Brand Name, Default Tiffin Prices & Password'}
             </p>
           </div>
         </div>
@@ -114,7 +150,7 @@ export default function SettingsPage() {
               required
               value={settings.brandName || ''}
               onChange={(e) => setSettings({ ...settings, brandName: e.target.value })}
-              placeholder="e.g. Papa Ka Register / Maa Annapurna Tiffin"
+              placeholder="e.g. MTC-LEDGER / Maa Annapurna Tiffin"
               className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
           </div>
@@ -230,31 +266,63 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* Security & System Preferences Card */}
+        {/* Security & Password Reset Card */}
         <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 space-y-3 text-xs font-semibold">
           <div className="flex items-center space-x-2 text-slate-900 font-extrabold border-b border-slate-100 pb-2">
-            <ShieldCheck className="w-4 h-4 text-emerald-600" />
-            <span>{lang === 'hi' ? '3. सुरक्षा एवं क्लाउड सिंक (Security & Cloud Sync)' : '3. Security & Cloud Preferences'}</span>
+            <Lock className="w-4 h-4 text-emerald-600" />
+            <span>{lang === 'hi' ? '3. पासवर्ड बदलें / रिसेट करें (Reset Admin Password)' : '3. Admin Password Reset'}</span>
           </div>
 
-          <div className="flex items-center justify-between bg-slate-50 p-3 rounded-xl border border-slate-200">
-            <div>
-              <span className="font-bold text-slate-900 block">
-                {lang === 'hi' ? 'Papa Single-Tap Quick Login' : 'Single-Tap Quick Login'}
-              </span>
-              <span className="text-[10px] text-slate-500">
-                {lang === 'hi' ? '1-क्लिक में एडमिन लॉगिन चालू रखें' : 'Enable 1-tap fast sign in for Papa'}
-              </span>
+          {pwdError && (
+            <div className="p-2.5 bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-xl font-bold">
+              {pwdError}
             </div>
+          )}
+
+          {pwdSuccess && (
+            <div className="p-2.5 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded-xl font-bold flex items-center gap-1.5">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span>{pwdSuccess}</span>
+            </div>
+          )}
+
+          <div>
+            <label className="block text-slate-700 mb-1">
+              {lang === 'hi' ? 'नया पासवर्ड दर्ज करें (New Password) *' : 'New Password *'}
+            </label>
             <input
-              type="checkbox"
-              checked={settings.quickLoginEnabled !== false}
-              onChange={(e) => setSettings({ ...settings, quickLoginEnabled: e.target.checked })}
-              className="w-5 h-5 accent-emerald-600 rounded cursor-pointer"
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              placeholder="Min 6 characters"
+              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
           </div>
 
-          <div className="bg-emerald-50/70 p-3 rounded-xl border border-emerald-200 flex items-center justify-between text-xs text-emerald-900 font-bold">
+          <div>
+            <label className="block text-slate-700 mb-1">
+              {lang === 'hi' ? 'नया पासवर्ड पुनः दर्ज करें (Confirm Password) *' : 'Confirm New Password *'}
+            </label>
+            <input
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="Confirm new password"
+              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            />
+          </div>
+
+          <button
+            type="button"
+            onClick={handlePasswordChange}
+            disabled={pwdLoading}
+            className="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-2 active-press transition"
+          >
+            <KeyRound className="w-4 h-4 text-emerald-400" />
+            <span>{pwdLoading ? 'Updating Password...' : (lang === 'hi' ? 'पासवर्ड अपडेट करें (Update Password)' : 'Update Admin Password')}</span>
+          </button>
+
+          <div className="bg-emerald-50/70 p-3 rounded-xl border border-emerald-200 flex items-center justify-between text-xs text-emerald-900 font-bold mt-2">
             <div className="flex items-center gap-2">
               <RefreshCw className="w-4 h-4 text-emerald-600 animate-spin" />
               <span>Firebase Cloud Sync: Active</span>

@@ -81,7 +81,7 @@ export default function ReportsPage() {
       const ws = XLSX.utils.json_to_sheet(reportData);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Report");
-      XLSX.writeFile(wb, `Papa_Register_${reportType}_${selectedMonth}.xlsx`);
+      XLSX.writeFile(wb, `MTC_LEDGER_${reportType}_${selectedMonth}.xlsx`);
       setToast('Excel exported successfully!');
       setTimeout(() => setToast(''), 3000);
     } catch (e) {

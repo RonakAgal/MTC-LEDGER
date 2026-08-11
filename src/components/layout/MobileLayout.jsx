@@ -27,11 +27,7 @@ export default function MobileLayout() {
   const isLoginPage = location.pathname === '/login';
 
   if (isLoginPage) {
-    return (
-      <div className="mobile-container min-h-screen bg-slate-50 flex flex-col justify-center">
-        <Outlet />
-      </div>
-    );
+    return <Outlet />;
   }
 
   const currentDateFormatted = format(new Date(), 'EEEE, dd MMMM yyyy');
@@ -60,8 +56,8 @@ export default function MobileLayout() {
             className="flex items-center space-x-2 cursor-pointer active-press group"
             title="Click to open Full Screen Menu Page"
           >
-            <div className="w-8 h-8 rounded-xl bg-white/20 group-hover:bg-white/30 backdrop-blur-md flex items-center justify-center border border-white/30 shadow-inner transition">
-              <Utensils className="w-4 h-4 text-white" />
+            <div className="w-8 h-8 rounded-xl bg-white/10 group-hover:bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30 shadow-inner transition overflow-hidden p-0.5">
+              <img src="/logo.png" alt="MTC-LEDGER Logo" className="w-full h-full object-contain rounded-lg" />
             </div>
             <div>
               <h1 className="text-sm font-black leading-tight tracking-tight flex items-center gap-1">
@@ -115,11 +111,11 @@ export default function MobileLayout() {
               <div className="bg-gradient-to-r from-emerald-800 to-teal-800 text-white p-4 space-y-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
-                    <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center font-bold">
-                      <Utensils className="w-5 h-5 text-white" />
+                    <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center font-bold overflow-hidden p-0.5 border border-white/20">
+                      <img src="/logo.png" alt="MTC-LEDGER Logo" className="w-full h-full object-contain rounded-lg" />
                     </div>
                     <div>
-                      <h2 className="text-base font-black leading-tight">Papa Ka Register</h2>
+                      <h2 className="text-base font-black leading-tight">{t('appTitle')}</h2>
                       <p className="text-[10px] text-emerald-200 font-medium">Tiffin & Catering Digital Manager</p>
                     </div>
                   </div>

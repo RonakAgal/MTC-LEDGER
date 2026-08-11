@@ -218,7 +218,7 @@ export default function PaymentsPage() {
                 {item.customer.mobile && (
                   <a
                     href={`https://wa.me/91${item.customer.mobile.replace(/\D/g, '')}?text=${encodeURIComponent(
-                      `नमस्ते ${item.customer.name} जी,\n\nPapa Ka Tiffin Register se aapka (${item.billingCycle === 'weekly' ? 'Weekly 7-Day' : item.billingCycle === 'fortnightly' ? '15-Day' : 'Monthly'}) tiffin bill balance ₹${item.pendingBalance} baaki hai.\n\nKripya UPI / Cash dwara bhugtan karein.\nDhanyawad!`
+                      `नमस्ते ${item.customer.name} जी,\n\nMTC-LEDGER se aapka (${item.billingCycle === 'weekly' ? 'Weekly 7-Day' : item.billingCycle === 'fortnightly' ? '15-Day' : 'Monthly'}) tiffin bill balance ₹${item.pendingBalance} baaki hai.\n\nKripya UPI / Cash dwara bhugtan karein.\nDhanyawad!`
                     )}`}
                     target="_blank"
                     rel="noreferrer"

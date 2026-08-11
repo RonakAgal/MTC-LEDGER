@@ -4,7 +4,7 @@ const LanguageContext = createContext();
 
 export const TRANSLATIONS = {
   en: {
-    appTitle: "Papa Ka Register",
+    appTitle: "MTC-LEDGER",
     appSub: "Tiffin & Catering Register",
     goodMorning: "Good Morning 🌅",
     goodEvening: "Good Evening 🌆",
@@ -96,7 +96,7 @@ export const TRANSLATIONS = {
     no: "NO ❌",
     language: "Language / भाषा",
     logout: "Logout",
-    loginTitle: "Papa Ka Register",
+    loginTitle: "MTC-LEDGER",
     loginSub: "Sign in to access digital register",
     emailLabel: "Email Address",
     passwordLabel: "Password",
@@ -104,7 +104,7 @@ export const TRANSLATIONS = {
     quickDemoLogin: "⚡ Single Tap Quick Admin Login"
   },
   hi: {
-    appTitle: "पापा का डिजिटल रजिस्टर",
+    appTitle: "MTC-LEDGER",
     appSub: "टिफिन एवं कैटरिंग रजिस्टर",
     goodMorning: "शुभ प्रभात 🌅",
     goodEvening: "शुभ संध्या 🌆",
@@ -196,7 +196,7 @@ export const TRANSLATIONS = {
     no: "नहीं (NO) ❌",
     language: "भाषा / Language",
     logout: "लॉगआउट करें",
-    loginTitle: "पापा का डिजिटल रजिस्टर",
+    loginTitle: "MTC-LEDGER",
     loginSub: "डिजिटल रजिस्टर उपयोग करने के लिए लॉगिन करें",
     emailLabel: "ईमेल आईडी",
     passwordLabel: "पासवर्ड",

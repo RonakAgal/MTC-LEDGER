@@ -132,7 +132,7 @@ export default function LedgerPage() {
               {currentCust.mobile && (
                 <a
                   href={`https://wa.me/91${currentCust.mobile.replace(/\D/g, '')}?text=${encodeURIComponent(
-                    `Hello ${currentCust.name},\nYour Tiffin Bill Summary:\nTotal Billed: ₹${ledgerData.totalBilled}\nTotal Paid: ₹${ledgerData.totalPaid}\nPending Balance: ₹${ledgerData.pendingBalance}\nThank you! - Papa Ka Register`
+                    `Hello ${currentCust.name},\nYour Tiffin Bill Summary:\nTotal Billed: ₹${ledgerData.totalBilled}\nTotal Paid: ₹${ledgerData.totalPaid}\nPending Balance: ₹${ledgerData.pendingBalance}\nThank you! - MTC-LEDGER`
                   )}`}
                   target="_blank"
                   rel="noreferrer"

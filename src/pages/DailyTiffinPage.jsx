@@ -341,39 +341,55 @@ export default function DailyTiffinPage() {
         </div>
       )}
 
-      {/* Sticky Bottom Bar for Final Confirmation */}
-      <div className="fixed bottom-16 left-0 right-0 z-30 bg-slate-900/95 backdrop-blur-md text-white p-3 shadow-2xl border-t border-slate-800">
-        <div className="max-w-md mx-auto space-y-2">
-          {/* Summary Counts */}
-          <div className="flex items-center justify-between text-[11px] font-bold text-slate-300 px-1">
-            <span className="text-emerald-400">
-              {lang === 'hi' ? 'कन्फर्म:' : 'Confirmed:'} <span className="text-white text-xs">{confirmedCount}</span>
-            </span>
-            <span className="text-rose-400">
-              {lang === 'hi' ? 'नहीं चाहिए:' : 'Skipped:'} <span className="text-white text-xs">{skippedCount}</span>
-            </span>
-            <span className="text-slate-400">
-              {lang === 'hi' ? 'कुल ग्राहक:' : 'Total:'} <span className="text-white text-xs">{totalCustomers}</span>
-            </span>
+      {/* Sticky Floating Bottom Summary & Confirmation Card */}
+      <div className="fixed bottom-16 left-0 right-0 z-30 px-3 pb-1.5 pointer-events-none">
+        <div className="max-w-md mx-auto bg-white/95 backdrop-blur-xl border border-slate-200/90 shadow-[0_-8px_30px_rgba(0,0,0,0.12)] rounded-2xl p-3 space-y-2 pointer-events-auto">
+          {/* Summary Pill Badges */}
+          <div className="grid grid-cols-3 gap-2 text-center">
+            {/* Confirmed Pill */}
+            <div className="flex items-center justify-center gap-1.5 bg-emerald-50 border border-emerald-200/80 text-emerald-800 py-1 px-1.5 rounded-xl text-[11px] font-extrabold">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+              <span>{lang === 'hi' ? 'कन्फर्म' : 'Confirmed'}</span>
+              <span className="bg-emerald-600 text-white text-[10px] font-black px-1.5 py-0.2 rounded-md ml-0.5 min-w-[18px]">
+                {confirmedCount}
+              </span>
+            </div>
+
+            {/* Skipped Pill */}
+            <div className="flex items-center justify-center gap-1.5 bg-rose-50 border border-rose-200/80 text-rose-800 py-1 px-1.5 rounded-xl text-[11px] font-extrabold">
+              <XCircle className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+              <span>{lang === 'hi' ? 'नहीं चाहिए' : 'Skipped'}</span>
+              <span className="bg-rose-600 text-white text-[10px] font-black px-1.5 py-0.2 rounded-md ml-0.5 min-w-[18px]">
+                {skippedCount}
+              </span>
+            </div>
+
+            {/* Total Pill */}
+            <div className="flex items-center justify-center gap-1.5 bg-slate-100 border border-slate-200 text-slate-700 py-1 px-1.5 rounded-xl text-[11px] font-extrabold">
+              <span>{lang === 'hi' ? 'कुल' : 'Total'}</span>
+              <span className="bg-slate-800 text-white text-[10px] font-black px-1.5 py-0.2 rounded-md ml-0.5 min-w-[18px]">
+                {totalCustomers}
+              </span>
+            </div>
           </div>
 
           {/* Confirm Button */}
           <button
             onClick={handleConfirmSave}
             disabled={saving || totalCustomers === 0}
-            className={`w-full py-3.5 rounded-xl font-black text-sm flex items-center justify-center gap-2 shadow-lg active-press transition ${
+            className={`w-full py-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md hover:shadow-lg active-press transition-all duration-150 ${
               activeMeal === 'lunch'
-                ? 'bg-amber-500 hover:bg-amber-600 text-slate-950'
-                : 'bg-indigo-600 hover:bg-indigo-700 text-white'
+                ? 'bg-gradient-to-r from-amber-500 via-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-950 shadow-amber-500/20'
+                : 'bg-gradient-to-r from-indigo-600 via-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-indigo-600/20'
             }`}
           >
-            <Check className="w-5 h-5 stroke-[3]" />
-            <span>
+            <Check className="w-4 h-4 stroke-[3]" />
+            <span className="tracking-wide">
               {saving
                 ? 'Saving...'
                 : activeMeal === 'lunch'
-                ? t('confirmLunch')
-                : t('confirmDinner')}
+                ? (lang === 'hi' ? '🍱 आज का लंच हिसाब सहेजें' : 'Confirm & Save Lunch')
+                : (lang === 'hi' ? '🌆 आज का डिनर हिसाब सहेजें' : 'Confirm & Save Dinner')}
             </span>
           </button>
         </div>
