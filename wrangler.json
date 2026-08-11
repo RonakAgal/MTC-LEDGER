@@ -1,0 +1,4 @@
+{
+  "name": "mtc-ledger",
+  "pages_build_output_dir": "./dist"
+}
