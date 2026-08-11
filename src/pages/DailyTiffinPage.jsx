@@ -4,10 +4,10 @@ import { useLanguage } from '../context/LanguageContext';
 import { dataService } from '../services/dataService';
 import { 
   Sun, Moon, CheckCircle2, XCircle, Plus, Minus, Calendar, 
-  Check, AlertCircle, RefreshCw, ChevronLeft, ChevronRight 
+  Check, AlertCircle, RefreshCw, Search, Mic, MicOff, X 
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { format, isWithinInterval, parseISO } from 'date-fns';
+import { parseISO } from 'date-fns';
 
 export default function DailyTiffinPage() {
   const { lang, t } = useLanguage();
@@ -24,6 +24,10 @@ export default function DailyTiffinPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+
+  // Search & Voice Search State
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isListening, setIsListening] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -84,6 +88,49 @@ export default function DailyTiffinPage() {
 
     setConfirmations(initialConfirmMap);
     setLoading(false);
+  };
+
+  const handleVoiceSearch = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      setToastMessage(lang === 'hi' ? 'आवाज से खोजें (Voice Search) सपोर्टेड नहीं है' : 'Voice Search not supported in browser.');
+      setTimeout(() => setToastMessage(''), 3000);
+      return;
+    }
+
+    try {
+      const recognition = new SpeechRecognition();
+      recognition.lang = lang === 'hi' ? 'hi-IN' : 'en-US';
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      recognition.onstart = () => {
+        setIsListening(true);
+        setToastMessage(lang === 'hi' ? '🎙️ बोलिए... (Listening...)' : '🎙️ Speak customer name...');
+      };
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        setSearchTerm(transcript.replace(/\./g, ''));
+        setIsListening(false);
+        setToastMessage(`🔍 "${transcript}"`);
+        setTimeout(() => setToastMessage(''), 2500);
+      };
+
+      recognition.onerror = (event) => {
+        console.warn("Speech recognition error", event.error);
+        setIsListening(false);
+      };
+
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+
+      recognition.start();
+    } catch (e) {
+      console.error("Voice search error", e);
+      setIsListening(false);
+    }
   };
 
   const handleStatusToggle = (customerId, newStatus) => {
@@ -154,8 +201,19 @@ export default function DailyTiffinPage() {
   const skippedCount = Object.values(confirmations).filter(c => c.status === 'skipped').length;
   const totalCustomers = activeCustomers.length;
 
+  // Filtered customer list by Search Term
+  const filteredCustomers = activeCustomers.filter(cust => {
+    if (!searchTerm.trim()) return true;
+    const term = searchTerm.toLowerCase().trim();
+    return (
+      cust.name.toLowerCase().includes(term) ||
+      cust.mobile.includes(term) ||
+      (cust.area && cust.area.toLowerCase().includes(term))
+    );
+  });
+
   return (
-    <div className="space-y-3 pb-24">
+    <div className="space-y-3 pb-28">
       {/* Toast Notification */}
       <AnimatePresence>
         {toastMessage && (
@@ -171,7 +229,7 @@ export default function DailyTiffinPage() {
         )}
       </AnimatePresence>
 
-      {/* Date Header & Meal Selector */}
+      {/* Date Header, Meal Selector & Voice Search Bar */}
       <div className="bg-white rounded-2xl p-3 shadow-sm border border-slate-200 space-y-3">
         {/* Date Selector Row */}
         <div className="flex items-center justify-between bg-slate-50 p-2 rounded-xl border border-slate-200/80">
@@ -213,6 +271,47 @@ export default function DailyTiffinPage() {
             <span>🌆 {lang === 'hi' ? 'आज का डिनर' : 'DINNER'}</span>
           </button>
         </div>
+
+        {/* Customer Search Bar with Voice Mic Audio Button */}
+        <div className="relative">
+          <Search className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder={lang === 'hi' ? 'नाम, मोबाइल या इलाका से खोजें...' : 'Search customer by name or area...'}
+            className="w-full pl-9 pr-20 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition"
+          />
+
+          <div className="absolute right-2 top-1.5 flex items-center gap-1">
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm('')}
+                className="p-1 text-slate-400 hover:text-slate-600 rounded-full"
+                title="Clear search"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+
+            <button
+              type="button"
+              onClick={handleVoiceSearch}
+              className={`p-1.5 rounded-lg text-white text-xs font-bold transition-all active-press flex items-center justify-center ${
+                isListening
+                  ? 'bg-rose-600 animate-pulse ring-2 ring-rose-400'
+                  : 'bg-emerald-600 hover:bg-emerald-700 shadow-xs'
+              }`}
+              title={lang === 'hi' ? 'बोलकर खोजें (Voice Search)' : 'Voice Search (Speak Name)'}
+            >
+              {isListening ? (
+                <MicOff className="w-4 h-4 animate-bounce" />
+              ) : (
+                <Mic className="w-4 h-4" />
+              )}
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Customer Confirmation List */}
@@ -221,19 +320,26 @@ export default function DailyTiffinPage() {
           <RefreshCw className="w-6 h-6 animate-spin mx-auto text-emerald-600" />
           <p>{lang === 'hi' ? 'ग्राहक सूची लोड हो रही है...' : 'Loading active customer register...'}</p>
         </div>
-      ) : activeCustomers.length === 0 ? (
-        <div className="bg-white rounded-2xl p-8 text-center border border-slate-200">
-          <AlertCircle className="w-8 h-8 text-amber-500 mx-auto mb-2" />
+      ) : filteredCustomers.length === 0 ? (
+        <div className="bg-white rounded-2xl p-8 text-center border border-slate-200 space-y-2">
+          <AlertCircle className="w-8 h-8 text-amber-500 mx-auto" />
           <p className="text-xs font-bold text-slate-700">
-            {lang === 'hi' ? 'कोई सक्रिय ग्राहक उपलब्ध नहीं है' : 'No active customers found for this date.'}
+            {searchTerm 
+              ? (lang === 'hi' ? `"${searchTerm}" नाम का कोई ग्राहक नहीं मिला` : `No customers matching "${searchTerm}"`)
+              : (lang === 'hi' ? 'कोई सक्रिय ग्राहक उपलब्ध नहीं है' : 'No active customers found for this date.')}
           </p>
-          <p className="text-[11px] text-slate-400 mt-1">
-            {lang === 'hi' ? 'ग्राहक सेक्शन से नया ग्राहक जोड़ें या अनपॉज करें।' : 'Add new customers or resume paused customers.'}
-          </p>
+          {searchTerm && (
+            <button
+              onClick={() => setSearchTerm('')}
+              className="px-3 py-1.5 bg-slate-100 text-slate-700 rounded-lg text-xs font-bold"
+            >
+              {lang === 'hi' ? 'खोज साफ़ करें (Clear Search)' : 'Clear Search'}
+            </button>
+          )}
         </div>
       ) : (
         <div className="space-y-3">
-          {activeCustomers.map((cust) => {
+          {filteredCustomers.map((cust) => {
             const conf = confirmations[cust.id] || { status: null, quantity: cust.defaultQty || 1 };
             const currentPrice = activeMeal === 'lunch' ? (cust.lunchPrice || 80) : (cust.dinnerPrice || 80);
             const totalItemAmount = conf.quantity * currentPrice;

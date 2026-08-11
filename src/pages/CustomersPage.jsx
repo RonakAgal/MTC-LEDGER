@@ -4,7 +4,8 @@ import { useLanguage } from '../context/LanguageContext';
 import { dataService } from '../services/dataService';
 import { 
   Users, Search, UserPlus, Phone, MapPin, PauseCircle, PlayCircle, 
-  ChevronRight, X, Calendar, DollarSign, FileText, CheckCircle2 
+  ChevronRight, X, Calendar, DollarSign, FileText, CheckCircle2,
+  Mic, MicOff 
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -15,8 +16,52 @@ export default function CustomersPage() {
 
   const [customers, setCustomers] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isListening, setIsListening] = useState(false);
   const [statusFilter, setStatusFilter] = useState('active'); // 'active' | 'paused' | 'inactive' | 'all'
   const [loading, setLoading] = useState(true);
+
+  const handleVoiceSearch = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      setToast(lang === 'hi' ? 'आवाज़ से खोजें (Voice Search) उपलब्ध नहीं है' : 'Voice Search not supported in browser.');
+      setTimeout(() => setToast(''), 3000);
+      return;
+    }
+
+    try {
+      const recognition = new SpeechRecognition();
+      recognition.lang = lang === 'hi' ? 'hi-IN' : 'en-US';
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      recognition.onstart = () => {
+        setIsListening(true);
+        setToast(lang === 'hi' ? '🎙️ बोलिए... (Listening...)' : '🎙️ Speak customer name...');
+      };
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        setSearchTerm(transcript.replace(/\./g, ''));
+        setIsListening(false);
+        setToast(`🔍 "${transcript}"`);
+        setTimeout(() => setToast(''), 2500);
+      };
+
+      recognition.onerror = (event) => {
+        console.warn("Speech recognition error", event.error);
+        setIsListening(false);
+      };
+
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+
+      recognition.start();
+    } catch (e) {
+      console.error("Voice search error", e);
+      setIsListening(false);
+    }
+  };
 
   // Add Customer Modal state
   const [showAddModal, setShowAddModal] = useState(false);
@@ -29,7 +74,7 @@ export default function CustomersPage() {
     lunchPrice: 80,
     dinnerPrice: 80,
     defaultQty: 1,
-    billingCycle: 'monthly', // 'weekly' | 'fortnightly' | 'monthly'
+    billingCycle: 'daily', // 'daily' | 'single' | 'weekly' | 'fortnightly' | 'monthly'
     startDate: new Date().toISOString().split('T')[0],
     notes: ''
   });
@@ -150,7 +195,7 @@ export default function CustomersPage() {
           </button>
         </div>
 
-        {/* Search Bar */}
+        {/* Search Bar with Voice Mic Audio Button */}
         <div className="relative">
           <Search className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
           <input
@@ -158,8 +203,37 @@ export default function CustomersPage() {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder={t('searchCustomer')}
-            className="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            className="w-full pl-9 pr-16 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition"
           />
+
+          <div className="absolute right-2 top-1.5 flex items-center gap-1">
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm('')}
+                className="p-1 text-slate-400 hover:text-slate-600 rounded-full"
+                title="Clear search"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+
+            <button
+              type="button"
+              onClick={handleVoiceSearch}
+              className={`p-1.5 rounded-lg text-white text-xs font-bold transition-all active-press flex items-center justify-center ${
+                isListening
+                  ? 'bg-rose-600 animate-pulse ring-2 ring-rose-400'
+                  : 'bg-emerald-600 hover:bg-emerald-700 shadow-xs'
+              }`}
+              title={lang === 'hi' ? 'बोलकर खोजें (Voice Search)' : 'Voice Search (Speak Name)'}
+            >
+              {isListening ? (
+                <MicOff className="w-4 h-4 animate-bounce" />
+              ) : (
+                <Mic className="w-4 h-4" />
+              )}
+            </button>
+          </div>
         </div>
 
         {/* Status Filter Tabs */}
@@ -385,31 +459,14 @@ export default function CustomersPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="block text-slate-700 mb-1">
-                    {lang === 'hi' ? 'भुगतान चक्र (Billing Cycle)' : 'Billing Cycle'}
-                  </label>
-                  <select
-                    value={formData.billingCycle || 'monthly'}
-                    onChange={(e) => setFormData({ ...formData, billingCycle: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium"
-                  >
-                    <option value="weekly">7 Days (Weekly)</option>
-                    <option value="fortnightly">15 Days (Bi-Weekly)</option>
-                    <option value="monthly">30 Days (Monthly)</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-slate-700 mb-1">{t('startDate')}</label>
-                  <input
-                    type="date"
-                    value={formData.startDate}
-                    onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  />
-                </div>
+              <div>
+                <label className="block text-slate-700 mb-1">{t('startDate')}</label>
+                <input
+                  type="date"
+                  value={formData.startDate}
+                  onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
               </div>
 
               <div>

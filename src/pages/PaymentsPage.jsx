@@ -184,7 +184,7 @@ export default function PaymentsPage() {
                       {item.customer.name}
                     </h3>
                     <span className="text-[9px] font-black uppercase bg-teal-100 text-teal-800 px-1.5 py-0.5 rounded">
-                      {item.billingCycle === 'weekly' ? 'Weekly (7D)' : item.billingCycle === 'fortnightly' ? '15 Days' : 'Monthly'}
+                      {item.billingCycle === 'daily' ? 'Daily (Per Day)' : item.billingCycle === 'single' ? 'Single Order' : item.billingCycle === 'weekly' ? 'Weekly (7D)' : item.billingCycle === 'fortnightly' ? '15 Days' : 'Monthly'}
                     </span>
                   </div>
                   <p className="text-xs text-slate-500 font-medium mt-0.5">
@@ -218,7 +218,7 @@ export default function PaymentsPage() {
                 {item.customer.mobile && (
                   <a
                     href={`https://wa.me/91${item.customer.mobile.replace(/\D/g, '')}?text=${encodeURIComponent(
-                      `नमस्ते ${item.customer.name} जी,\n\nMTC-LEDGER se aapka (${item.billingCycle === 'weekly' ? 'Weekly 7-Day' : item.billingCycle === 'fortnightly' ? '15-Day' : 'Monthly'}) tiffin bill balance ₹${item.pendingBalance} baaki hai.\n\nKripya UPI / Cash dwara bhugtan karein.\nDhanyawad!`
+                      `नमस्ते ${item.customer.name} जी,\n\nMTC-LEDGER se aapka (${item.billingCycle === 'daily' ? 'Daily Tiffin' : item.billingCycle === 'single' ? 'Single Day Order' : item.billingCycle === 'weekly' ? 'Weekly 7-Day' : item.billingCycle === 'fortnightly' ? '15-Day' : 'Monthly'}) tiffin bill balance ₹${item.pendingBalance} baaki hai.\n\nKripya UPI / Cash dwara bhugtan karein.\nDhanyawad!`
                     )}`}
                     target="_blank"
                     rel="noreferrer"

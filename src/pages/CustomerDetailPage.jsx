@@ -454,6 +454,23 @@ export default function CustomerDetailPage() {
               </div>
 
               <div>
+                <label className="block text-slate-700 mb-1">
+                  {lang === 'hi' ? 'ऑर्डर / भुगतान प्रकार (Billing Type)' : 'Billing / Order Type'}
+                </label>
+                <select
+                  value={editForm.billingCycle || 'daily'}
+                  onChange={(e) => setEditForm({ ...editForm, billingCycle: e.target.value })}
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium"
+                >
+                  <option value="daily">🍱 Daily / Per Tiffin (रोजाना)</option>
+                  <option value="single">⚡ Single Day / 1-Day (1-दिन)</option>
+                  <option value="weekly">📅 7 Days (Weekly / साप्ताहिक)</option>
+                  <option value="fortnightly">📅 15 Days (Bi-Weekly / 15-दिन)</option>
+                  <option value="monthly">📅 30 Days (Monthly / मासिक)</option>
+                </select>
+              </div>
+
+              <div>
                 <label className="block text-slate-700 mb-1">{t('status')}</label>
                 <select
                   value={editForm.status || 'active'}
